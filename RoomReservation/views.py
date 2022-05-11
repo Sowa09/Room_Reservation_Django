@@ -28,3 +28,4 @@ class RoomListView(View):
     def get(self, request):
         room = Room.objects.all()
         return render(request, 'room_list.html', {'rooms': room})
+
