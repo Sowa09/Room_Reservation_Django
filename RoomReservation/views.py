@@ -4,7 +4,7 @@ from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.views import View
 
-from .models import RoomForm
+from .models import RoomForm, Room
 
 
 def index(request):
@@ -20,5 +20,11 @@ class AddRoomView(View):
         form = RoomForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect(reverse_lazy('add_room'))
+            return redirect(reverse_lazy('add-room'))
         return render(request, 'add_room.html', {'form': form})
+
+
+class RoomListView(View):
+    def get(self, request):
+        room = Room.objects.all()
+        return render(request, 'room_list.html', {'rooms': room})
