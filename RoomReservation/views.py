@@ -29,3 +29,9 @@ class RoomListView(View):
         room = Room.objects.all()
         return render(request, 'room_list.html', {'rooms': room})
 
+
+class DeleteRoomView(View):
+    def get(self, request, room_id):
+        room = Room.objects.get(id=room_id)
+        room.delete()
+        return redirect('room-list')
