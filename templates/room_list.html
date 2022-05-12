@@ -13,7 +13,7 @@
         <tbody>
         {% for r in rooms %}
             <tr class="d-flex">
-                <th scope="row" class="col-1">{{ r.id }}</th>
+                <th scope="row" class="col-1">{{  forloop.counter }}</th>
                 <td class="col-2">
                     <a href="/room/{{ r.id }}/">{{ r.name }}</a>
                 </td>
