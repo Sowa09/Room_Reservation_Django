@@ -19,10 +19,15 @@ class RoomForm(ModelForm):
 
 class RoomReservation(models.Model):
     room_id = models.ForeignKey(Room, on_delete=models.CASCADE)
-    date = models.DateField()
-    comment = models.TextField(null=True)
+    date = models.DateTimeField(verbose_name='Data')
+    comment = models.TextField(null=True, verbose_name='Komentarz')
 
     class Meta:
         unique_together = ('room_id', 'date')
 
+
+class RoomReservationForm(ModelForm):
+    class Meta:
+        model = RoomReservation
+        fields = '__all__'
 
