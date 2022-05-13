@@ -59,13 +59,13 @@ class ModifyRoomView(View):
 
 class RoomReservationView(View):
     def get(self, request, room_id):
-        room = Room.objects.get(pk=room_id)
+        room = Room.objects.get(id=room_id)
         reservations = room.roomreservation_set.filter(date__gte=str(date.today())).order_by('date')
         ctx = {'room': room, 'reservations': reservations}
         return render(request, 'room_reservation.html', ctx)
 
     def post(self, request, room_id):
-        room = Room.objects.get(pk=room_id)
+        room = Room.objects.get(id=room_id)
         date_r = request.POST.get('reservation-date')
         comment = request.POST.get('comment')
         if RoomReservation.objects.filter(room_id=room_id, date=date_r):
@@ -85,6 +85,23 @@ class RoomDetailView(View):
         return render(request, 'room_details.html', {'room': room, 'reservations': reservations})
 
 
+class RoomSearchView(View):
+    def get(self, request):
+        name = request.GET.get("room-name")
+        capacity = request.GET.get("capacity")
+        capacity = int(capacity) if capacity else 0
+        projector = request.GET.get("projector") == "on"
+        rooms = Room.objects.all()
 
+        if projector:
+            rooms = rooms.filter(projector_availability=projector)
+        if capacity:
+            rooms = rooms.filter(capacity__gte=capacity)
+        if name:
+            rooms.filter(name__contains=name)
 
+        for room in rooms:
+            reservation_dates = [reservation.date for reservation in room.roomreservation_set.all()]
+            room.reserved = str(date.today()) in reservation_dates
 
+        return render(request, 'room_list.html', context={'rooms': rooms, 'date': date.today()})
