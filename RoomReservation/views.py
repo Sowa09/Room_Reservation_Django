@@ -76,3 +76,15 @@ class RoomReservationView(View):
 
         RoomReservation.objects.create(room_id=room, date=date_r, comment=comment)
         return redirect('room-list')
+
+
+class RoomDetailView(View):
+    def get(self, request, room_id):
+        room = Room.objects.get(id=room_id)
+        reservations = room.roomreservation_set.filter(date__gte=str(date.today())).order_by('date')
+        return render(request, 'room_details.html', {'room': room, 'reservations': reservations})
+
+
+
+
+
