@@ -1,10 +1,11 @@
+from datetime import date
+
 from django.shortcuts import redirect
 
 from django.shortcuts import render
-from django.urls import reverse_lazy
 from django.views import View
 
-from .models import RoomForm, Room, RoomReservationForm
+from .models import RoomForm, Room, RoomReservation
 
 
 def index(request):
@@ -56,16 +57,22 @@ class ModifyRoomView(View):
         return render(request, 'room_list.html', {'form': form})
 
 
-class RoomReservationView(View): # not working yet
+class RoomReservationView(View):
     def get(self, request, room_id):
-        room = Room.objects.get(id=room_id)
-        form = RoomReservationForm(instance=room)
-        return render(request, 'room_reservation.html', {'form': form})
+        room = Room.objects.get(pk=room_id)
+        reservations = room.roomreservation_set.filter(date__gte=str(date.today())).order_by('date')
+        ctx = {'room': room, 'reservations': reservations}
+        return render(request, 'room_reservation.html', ctx)
 
     def post(self, request, room_id):
-        room = Room.objects.get(id=room_id)
-        form = RoomReservationForm(request.POST, instance=room)
-        if form.is_valid():
-            form.save()
-            return render(request, 'room_reservation.html', {'form': form})
-        return render(request, 'room_reservation.html', {'form': form})
+        room = Room.objects.get(pk=room_id)
+        date_r = request.POST.get('reservation-date')
+        comment = request.POST.get('comment')
+        if RoomReservation.objects.filter(room_id=room_id, date=date_r):
+            return render(request, 'room_reservation.html',
+                          context={'room': room, 'error': 'Sala jest już zarezerwowana! Proszę wybrać inną datę'})
+        if date_r < str(date.today()):
+            return render(request, 'room_reservation.html', context={'room': room, "error": 'Data jest z przeszłości!'})
+
+        RoomReservation.objects.create(room_id=room, date=date_r, comment=comment)
+        return redirect('room-list')
